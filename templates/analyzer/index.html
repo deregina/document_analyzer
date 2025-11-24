@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="main-layout">
+    <!-- Left side: Main content area -->
+    <div class="main-content">
+        <!-- File Upload Section -->
+        <section class="upload-section">
+            <h2>Upload Documents</h2>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" multiple accept=".pdf,.docx,.xlsx,.xls,.eml,.msg" style="display: none;">
+                <div class="upload-placeholder">
+                    <p>📄 Drag and drop files here or click to browse</p>
+                    <p class="upload-hint">Supports: PDF, Word, Excel, Email files</p>
+                </div>
+            </div>
+            <div id="uploadStatus" class="upload-status"></div>
+        </section>
+
+        <!-- Uploaded Documents List -->
+        <section class="documents-section">
+            <h2>Uploaded Documents</h2>
+            <div id="documentsList" class="documents-list">
+                {% for doc in documents %}
+                <div class="document-item" data-doc-id="{{ doc.id }}">
+                    <span class="doc-icon">
+                        {% if doc.file_type == 'pdf' %}📕
+                        {% elif doc.file_type == 'docx' %}📘
+                        {% elif doc.file_type == 'xlsx' %}📊
+                        {% elif doc.file_type == 'email' %}📧
+                        {% else %}📄
+                        {% endif %}
+                    </span>
+                    <span class="doc-name">{{ doc.filename }}</span>
+                    <span class="doc-type">{{ doc.get_file_type_display }}</span>
+                    <button class="btn-delete" onclick="deleteDocument({{ doc.id }})" title="Delete">🗑️</button>
+                </div>
+                {% empty %}
+                <p class="empty-message">No documents uploaded yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Question & Answer Section -->
+        <section class="qa-section">
+            <h2>Ask Questions</h2>
+            <div class="qa-container">
+                <div id="conversationHistory" class="conversation-history">
+                    <!-- Q&A pairs will be displayed here -->
+                </div>
+                <div class="question-input-area">
+                    <textarea 
+                        id="questionInput" 
+                        placeholder="Ask a question about your documents..."
+                        rows="3"
+                    ></textarea>
+                    <button id="askButton" class="btn-primary" onclick="askQuestion()">Ask</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Right side: Source Chunks Panel -->
+    <div class="sidebar" id="sourceDocumentsPanel">
+        <h2>Source Excerpts</h2>
+        <div id="sourceDocumentsList" class="source-documents-list">
+            <p class="empty-message">Select a question to see source excerpts</p>
+        </div>
+    </div>
+</div>
+
+{% csrf_token %}
+<script>
+    // Store current conversation ID
+    let currentConversationId = null;
+    
+    // Get CSRF token from the page
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        setupFileUpload();
+        loadDocuments();
+    });
+</script>
+{% endblock %}
+
