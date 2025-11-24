@@ -50,6 +50,7 @@ Thumbs.db
 
 # Project specific
 uploads/
+explanation/
 *.pdf
 *.docx
 *.xlsx
